@@ -18,33 +18,43 @@ export async function POST(req) {
 
     const prompt = prompts[materialType] || prompts.summary;
 
-    // Using Hugging Face API (free tier)
+    console.log("📤 Calling HF API with prompt:", prompt);
+    console.log("🔑 API Key exists:", !!process.env.HUGGINGFACE_API_KEY);
+
     const response = await fetch(
-      "https://api-inference.huggingface.co/models/google/flan-t5-base",
+      "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.1",
       {
-        headers: { Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}` },
+        headers: { 
+          Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
+          "Content-Type": "application/json"
+        },
         method: "POST",
         body: JSON.stringify({ inputs: prompt }),
       }
     );
 
-    const result = await response.json();
+    console.log("📥 Response status:", response.status);
 
+    // Check response status BEFORE parsing JSON
     if (!response.ok) {
-      console.error("HF Error:", result);
+      const errorText = await response.text();
+      console.error("❌ HF Error Response:", errorText);
       return Response.json(
-        { error: result.error?.[0] || "Failed to generate material" },
+        { error: `API Error (${response.status}): ${errorText.substring(0, 100)}` },
         { status: response.status }
       );
     }
 
-    const text = result[0]?.generated_text || "No response";
+    const result = await response.json();
+    console.log("✅ HF Response:", result);
+
+    const text = result[0]?.generated_text || "No response generated";
 
     return Response.json({ content: text });
   } catch (error) {
     console.error("🔴 API Error:", error.message);
     return Response.json(
-      { error: error.message || "Failed to generate material" },
+      { error: `Server Error: ${error.message}` },
       { status: 500 }
     );
   }
