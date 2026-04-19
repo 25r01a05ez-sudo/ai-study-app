@@ -22,7 +22,7 @@ export async function POST(req) {
     console.log("🔑 API Key exists:", !!process.env.HUGGINGFACE_API_KEY);
 
     const response = await fetch(
-      "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.1",
+      "https://api-inference.huggingface.co/models/gpt2",
       {
         headers: { 
           Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
