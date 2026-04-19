@@ -18,33 +18,33 @@ export async function POST(req) {
 
     const prompt = prompts[materialType] || prompts.summary;
 
-    const response = await fetch("http://localhost:11434/api/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "mistral",
-        prompt: prompt,
-        stream: false,
-      }),
-    });
+    // Using Hugging Face API (free tier)
+    const response = await fetch(
+      "https://api-inference.huggingface.co/models/google/flan-t5-base",
+      {
+        headers: { Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}` },
+        method: "POST",
+        body: JSON.stringify({ inputs: prompt }),
+      }
+    );
 
     const result = await response.json();
 
     if (!response.ok) {
-      console.error("Ollama Error:", result);
+      console.error("HF Error:", result);
       return Response.json(
-        { error: result.error || "Failed to generate material" },
+        { error: result.error?.[0] || "Failed to generate material" },
         { status: response.status }
       );
     }
 
-    const text = result.response || "No response";
+    const text = result[0]?.generated_text || "No response";
 
     return Response.json({ content: text });
   } catch (error) {
     console.error("🔴 API Error:", error.message);
     return Response.json(
-      { error: "Make sure Ollama is running: ollama serve" },
+      { error: error.message || "Failed to generate material" },
       { status: 500 }
     );
   }
