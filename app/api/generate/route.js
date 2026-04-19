@@ -17,37 +17,47 @@ export async function POST(req) {
     };
 
     const prompt = prompts[materialType] || prompts.summary;
+    const apiKey = process.env.HUGGINGFACE_API_KEY;
 
-    console.log("📤 Calling HF API...");
-    console.log("🔑 API Key:", process.env.HUGGINGFACE_API_KEY ? "✅ Set" : "❌ Missing");
+    console.log("🔑 API Key Set?", !!apiKey);
+    console.log("📝 Prompt:", prompt);
 
     const response = await fetch(
-      "https://api-inference.huggingface.co/models/google/flan-t5-base",
+      "https://api-inference.huggingface.co/models/gpt2",
       {
-        headers: { Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}` },
+        headers: { 
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json"
+        },
         method: "POST",
         body: JSON.stringify({ inputs: prompt }),
       }
     );
 
-    console.log("📥 Response status:", response.status);
+    console.log("📥 Response Status:", response.status);
+    console.log("📥 Response Headers:", Object.fromEntries(response.headers));
 
-    // CHECK RESPONSE STATUS FIRST - BEFORE parsing JSON!
+    const errorText = await response.text();
+    console.log("📥 Raw Response:", errorText.substring(0, 300));
+
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("❌ HF Error:", errorText.substring(0, 200));
       return Response.json(
-        { error: `API Error (${response.status}): Check Vercel logs for details` },
+        { error: `API Error (${response.status}): ${errorText.substring(0, 100)}` },
         { status: response.status }
       );
     }
 
-    const result = await response.json();
-    console.log("✅ HF Success:", result);
-
-    const text = result[0]?.generated_text || "No response";
-
-    return Response.json({ content: text });
+    // Try to parse as JSON
+    try {
+      const result = JSON.parse(errorText);
+      const text = result[0]?.generated_text || "No response";
+      return Response.json({ content: text });
+    } catch (e) {
+      return Response.json(
+        { error: `Failed to parse response: ${e.message}` },
+        { status: 500 }
+      );
+    }
   } catch (error) {
     console.error("🔴 API Error:", error.message);
     return Response.json(
