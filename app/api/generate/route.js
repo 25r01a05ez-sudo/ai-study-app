@@ -9,55 +9,17 @@ export async function POST(req) {
       );
     }
 
-    const prompts = {
-      summary: `Create a study summary about "${topic}" in 150 words.`,
-      quiz: `Create 3 quiz questions about "${topic}" with answers.`,
-      notes: `Create study notes for "${topic}".`,
-      flashcards: `Create 5 flashcard Q&A about "${topic}".`,
+    // Mock data for testing
+    const mockResponses = {
+      summary: `Study Summary: ${topic}\n\nThis is a comprehensive overview of ${topic}. Key points include understanding the fundamentals, practical applications, and real-world examples. ${topic} is an important concept that plays a significant role in modern society.`,
+      quiz: `Quiz on ${topic}:\n\n1. What is ${topic}?\nAnswer: ${topic} is a fundamental concept.\n\n2. How is ${topic} applied?\nAnswer: ${topic} has many practical applications.\n\n3. Why is ${topic} important?\nAnswer: Understanding ${topic} helps in problem-solving.`,
+      notes: `Study Notes on ${topic}:\n- Introduction to ${topic}\n- Key concepts and definitions\n- Real-world applications\n- Practice problems\n- Conclusion`,
+      flashcards: `Flashcard 1:\nQ: Define ${topic}\nA: ${topic} is a concept that...\n\nFlashcard 2:\nQ: Give an example of ${topic}\nA: An example would be...`,
     };
 
-    const prompt = prompts[materialType] || prompts.summary;
-    const apiKey = process.env.HUGGINGFACE_API_KEY;
+    const content = mockResponses[materialType] || mockResponses.summary;
 
-    console.log("🔑 API Key Set?", !!apiKey);
-    console.log("📝 Prompt:", prompt);
-
-    const response = await fetch(
-      "https://api-inference.huggingface.co/models/gpt2",
-      {
-        headers: { 
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json"
-        },
-        method: "POST",
-        body: JSON.stringify({ inputs: prompt }),
-      }
-    );
-
-    console.log("📥 Response Status:", response.status);
-    console.log("📥 Response Headers:", Object.fromEntries(response.headers));
-
-    const errorText = await response.text();
-    console.log("📥 Raw Response:", errorText.substring(0, 300));
-
-    if (!response.ok) {
-      return Response.json(
-        { error: `API Error (${response.status}): ${errorText.substring(0, 100)}` },
-        { status: response.status }
-      );
-    }
-
-    // Try to parse as JSON
-    try {
-      const result = JSON.parse(errorText);
-      const text = result[0]?.generated_text || "No response";
-      return Response.json({ content: text });
-    } catch (e) {
-      return Response.json(
-        { error: `Failed to parse response: ${e.message}` },
-        { status: 500 }
-      );
-    }
+    return Response.json({ content });
   } catch (error) {
     console.error("🔴 API Error:", error.message);
     return Response.json(
