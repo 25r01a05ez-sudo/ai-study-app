@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Loader, Copy, Check } from "lucide-react";
 import Link from "next/link";
-import { UserButton, Show, SignInButton } from "@clerk/nextjs";
 
 export default function CreatePage() {
   const [topic, setTopic] = useState("");
@@ -63,16 +62,6 @@ export default function CreatePage() {
               Dashboard
             </button>
           </Link>
-          <Show when="signed-in">
-            <UserButton afterSignOutUrl="/" />
-          </Show>
-          <Show when="signed-out">
-            <SignInButton mode="modal">
-              <button className="px-4 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-lg transition">
-                Sign In
-              </button>
-            </SignInButton>
-          </Show>
         </div>
       </nav>
 
