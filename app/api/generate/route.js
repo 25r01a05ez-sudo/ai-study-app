@@ -18,16 +18,16 @@ export async function POST(req) {
 
     const prompt = prompts[materialType] || prompts.summary;
 
-    console.log("📤 Calling OpenAI API with prompt:", prompt);
+    console.log("📤 Calling Featherless AI API with prompt:", prompt);
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch("https://api.featherless.ai/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Authorization": `Bearer ${process.env.FEATHERLESS_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo",
+        model: "openai/gpt-oss-120b",
         messages: [
           {
             role: "system",
@@ -47,7 +47,7 @@ export async function POST(req) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("❌ OpenAI Error Response:", errorText);
+      console.error("❌ Featherless AI Error Response:", errorText);
       return Response.json(
         { error: `API Error (${response.status}): ${errorText.substring(0, 100)}` },
         { status: response.status }
@@ -55,7 +55,7 @@ export async function POST(req) {
     }
 
     const result = await response.json();
-    console.log("✅ OpenAI Response:", result);
+    console.log("✅ Featherless AI Response:", result);
 
     const content = result.choices?.[0]?.message?.content || "No response generated";
 
