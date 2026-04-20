@@ -57,7 +57,7 @@ export async function POST(req) {
       const errorText = await response.text();
       console.error("❌ Featherless AI Error Response:", errorText);
       return Response.json(
-        { error: `API Error (${response.status}): ${errorText.substring(0, 100)}` },
+        { error: `API Error (${response.status}): ${errorText}` },
         { status: response.status }
       );
     }
