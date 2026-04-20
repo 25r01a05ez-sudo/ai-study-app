@@ -85,9 +85,15 @@ export default function StudyGeniusTailwind() {
   };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(content).catch(() => {});
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    navigator.clipboard.writeText(content).then(
+      () => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      },
+      () => {
+        setError("Could not copy to clipboard. Please copy the text manually.");
+      }
+    );
   };
 
   const difficultyStyles = {

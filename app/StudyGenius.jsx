@@ -86,9 +86,15 @@ export default function StudyGenius() {
   };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(content).catch(() => {});
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    navigator.clipboard.writeText(content).then(
+      () => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      },
+      () => {
+        setError("Could not copy to clipboard. Please copy the text manually.");
+      }
+    );
   };
 
   return (
