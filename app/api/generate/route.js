@@ -1,13 +1,5 @@
 export async function POST(req) {
   try {
-    if (!process.env.FEATHERLESS_API_KEY) {
-      console.error("❌ FEATHERLESS_API_KEY is not set in environment variables");
-      return Response.json(
-        { error: "Server configuration error: FEATHERLESS_API_KEY is missing. Please add it to your .env.local file." },
-        { status: 500 }
-      );
-    }
-
     const { topic, materialType } = await req.json();
 
     if (!topic || !materialType) {
@@ -57,7 +49,7 @@ export async function POST(req) {
       const errorText = await response.text();
       console.error("❌ Featherless AI Error Response:", errorText);
       return Response.json(
-        { error: `API Error (${response.status}): ${errorText}` },
+        { error: `API Error (${response.status}): ${errorText.substring(0, 100)}` },
         { status: response.status }
       );
     }
